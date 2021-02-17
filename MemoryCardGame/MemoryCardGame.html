@@ -200,6 +200,7 @@
 <html>
     <head>
         <link href="https://fonts.googleapis.com/css2?family=Rambla&display=swap" rel="stylesheet">
+        <title>Matching Pairs</title>
     </head>
 
     <body>
@@ -320,6 +321,8 @@
         }
 
         const gameInitialiser = (numberOfPairs) => {
+            document.querySelectorAll(".playerScore").forEach((element) => element.innerHTML = 0);
+
             openedPairs = 0;
             totalNumberPairs = numberOfPairs;
             state = 99;
