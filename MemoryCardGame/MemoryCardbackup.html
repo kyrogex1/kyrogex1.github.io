@@ -1,0 +1,462 @@
+<style>
+
+    body {
+        font-family: 'Rambla', sans-serif;
+    }
+
+    .gameContainer {
+        display : flex;
+        margin : auto;
+        border : 2px solid skyblue;
+        border-radius : 2px;
+    }
+
+    /* Card Styles */
+    .cardContainer {
+        height : 500px;
+        min-width : 800px;
+        flex-grow : 1;
+        background-color : pink;
+        display : flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .cardRow {
+        display : flex;
+        flex-wrap: wrap;
+    }
+
+    .cardScene {
+        position : relative;
+        left : 0px;
+        top : 0px;
+        margin : 5px;
+        transform-origin : 0% 0%;
+        transition : all 1s;
+    }
+
+    .card {
+        position : relative;
+        top : 0px;
+        left : 0px;
+        height : 140px;
+        width : 106px;
+        background-color : white;
+        border-radius : 7%;
+        box-sizing : border-box;
+        transform-style: preserve-3d;
+        transition : all 1s;
+    }
+
+    .cardActive {
+        transform : rotateY(180deg);
+    }
+
+    .face {
+        position : absolute;
+        top : 10px;
+        left : 10px;
+        right : 10px;
+        bottom : 10px;
+        backface-visibility: hidden;
+    }
+
+    .front {
+        background-color : green;
+    }
+
+    .back {
+        background-color : yellow;
+        transform : rotateY(180deg);
+    }
+
+    /* UI Styles */
+    .uiContainer {
+        min-width : 300px;
+        display : flex;
+        flex-direction: column;
+    }
+
+    .playerCardContainer {
+        display: flex;
+        justify-content: space-around;
+        align-items: flex-start;
+    }
+    .playerCard {
+        border : 2px solid rgb(126, 240, 126);
+        margin : 10px;
+        padding : 5px;
+        transition : all 0.7s;
+        filter : opacity(50%);
+        color : blue;
+
+    }
+
+    .playerActive {
+        filter : opacity(100%);
+        border-color : green;
+        box-shadow: 0px 0px 5px green, 0px 0px 20px green;
+    }
+
+    .playerName,
+    .playerScore {
+        text-align: center;
+    }
+
+    .settingsContainer {
+        padding : 20px;
+        background-color : green;
+    }
+
+    .settingsField {
+        text-align : center;
+        margin : 10px 0px;
+    }
+    
+    /* multiKill Banner */
+    .multiKillsBanner {
+        position : fixed;
+        top : 0px;
+        left : 100px;
+        right : 100px;
+    }
+
+    .multiKillsBanner p {
+        width : 12rem;
+        background : black;
+        background-clip : text;
+        -webkit-background-clip: text;
+        color : transparent;
+        font-size : 2rem;
+        padding : 2px;
+        margin : 10px auto;
+        text-align : center;
+        position : relative;
+        animation : bannerAnimationBasic 5s linear 0s 1;
+        animation-fill-mode: both;
+    }
+
+    .multiKillsBanner p.rainbow {
+        background : linear-gradient(to right, rgb(0, 255, 242), rgb(217, 0, 255), red);
+        background-clip : text;
+        -webkit-background-clip: text;
+    }
+
+    .multiKillsBanner p.glow {
+        text-shadow : 0 0 10px darkblue;
+        animation : bannerAnimationBasic 5s linear 0s 1, bannerAnimationHue 2.5s linear 0s 2;
+        animation-fill-mode: both;
+    }
+
+    .multiKillsBanner p.afterEffects {
+        overflow : hidden;
+    }
+
+    .multiKillsBanner p.afterEffects::after {
+        content : "";
+        position : absolute;
+        height : 2px;
+        width : 100%;
+        top : 1px;
+        filter : blur(2px);
+        background-color : red;
+        animation : bannerAnimationAfterEffects 1s ease infinite;
+    }
+
+    .multiKillsBanner p.afterEffects::before {
+        content : "";
+        position : absolute;
+        height : 2px;
+        width : 100%;
+        bottom : 1px;
+        filter : blur(2px);
+        background-color : red;
+        animation : bannerAnimationBeforeEffects 1s ease infinite;
+    }
+
+    @keyframes bannerAnimationBasic {
+        0% {top : -3rem; opacity : 0; max-height: 0rem;}
+        10% {top : 0px; opacity : 1; max-height: 2rem;}
+        90% {top : 0px; opacity : 1; max-height: 2rem;}
+        100% {top : -3rem; opacity : 0; max-height: 0rem;}
+    }
+
+    @keyframes bannerAnimationHue {
+        0% { filter : hue-rotate(0deg);}
+        100% {filter : hue-rotate(360deg);}
+    }
+
+    @keyframes bannerAnimationAfterEffects {
+        0% {left : -100%}
+        100% {left : 100%}
+    }
+
+    @keyframes bannerAnimationBeforeEffects {
+        0% {right : -100%}
+        100% {right : 100%}
+    }
+
+
+</style>
+
+<html>
+    <head>
+        <link href="https://fonts.googleapis.com/css2?family=Rambla&display=swap" rel="stylesheet">
+    </head>
+
+    <body>
+        <div class="gameContainer">
+            <div class="cardContainer">
+                <!-- 
+                    <div class="cardScene">   
+                        <div class="card" data-pair="${pairId}">
+                                <div class="face front">front</div>
+                                <div class="face back">${pairId}</div>
+                        </div>
+                    </div> 
+                -->
+            </div>
+            <div class="uiContainer">
+                <div class="settingsContainer" style="flex : 1">
+                    <div class="settingsField">
+                        <label for="gameMode">Number of Pairs :</label>
+                        <select id="gameMode" name="gameMode">
+                            <option value="4" selected="selected">4</option>
+                            <option value="6">6</option>
+                            <option value="8">8</option>
+                            <option value="10">10</option>
+                        </select>
+                        <div class="settingsField">
+                            <button id="initialiseGame">StartGame</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="playerCardContainer" style="flex : 2">
+                    <div class="playerCard">
+                        <div style="background-color : rgb(12, 206, 180); width : 100px; height : 100px"></div>
+                        <p class="playerName">Player 1</p>
+                        <p class="playerScore">0</p>
+                    </div>
+                    <div class="playerCard">
+                        <div style="background-color : rgb(12, 206, 180); width : 100px; height : 100px"></div>
+                        <p class="playerName">Player 2</p>
+                        <p class="playerScore">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="multiKillsBanner">
+                <!-- <p>HELLO WORLD</p> -->
+            </div>
+        </div>
+    </body>
+
+    <script>
+        const gameContainer = document.querySelector('.gameContainer');
+        const cardContainer = document.querySelector('.cardContainer');
+
+        let openedCard;
+        let state = 0;
+        let playerTurn;
+        let currentPlayer;
+        let numberOfPlayers = 2;
+        let testVar;
+        let totalNumberPairs;
+        let openedPairs;
+        let currentCombo;
+
+        /**
+         * Fisher Yates Shuffling Algorithm
+         */
+        const shuffle = function(a) {
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        const offset = (element) => {
+            const rect = element.getBoundingClientRect();
+            return {
+                left : rect.left + window.scrollX,
+                top : rect.top + window.scrollY
+            }
+        }
+
+        const matchPairsEffect = (...elements) => {
+            elements.forEach(element => {
+                let pixelsToMoveLeft = offset(currentPlayer).left - offset(element).left;
+                let pixelsToMoveTop = offset(currentPlayer).top - offset(element).top;
+                element.style.left = pixelsToMoveLeft;
+                element.style.top = pixelsToMoveTop;
+                element.style.opacity = "0";
+                element.style.transform = "scale(0.4)"
+            })
+
+            return;
+
+            // remember to add event litsener to destroy the cards
+        }
+
+        const changePlayer = (futurePlayerTurn) => {
+            const arrayOfPlayers = Array.from(document.querySelectorAll('.playerCard'));
+            arrayOfPlayers.forEach(player => player.classList.remove('playerActive'));
+
+            if (!futurePlayerTurn){
+                playerTurn %= numberOfPlayers;
+                playerTurn += 1;
+            }
+            else
+                playerTurn = futurePlayerTurn;
+            currentPlayer = arrayOfPlayers[playerTurn - 1];
+            currentPlayer.classList.add('playerActive');
+            
+            return;
+
+        }
+
+        function timeout (ms) {
+             return new Promise(res => setTimeout(res,ms));
+        }
+
+        const gameInitialiser = (numberOfPairs) => {
+            openedPairs = 0;
+            totalNumberPairs = numberOfPairs;
+            state = 99;
+            cardsHTML = "";
+
+            let orderOfCards = [];
+            for(let x = 0; x < totalNumberPairs*2; x++)
+                orderOfCards.push(parseInt(x / 2));
+            shuffle(orderOfCards);
+            
+            while(cardContainer.firstChild)
+                cardContainer.removeChild(cardContainer.firstChild);
+
+            orderOfCards.forEach((pairId, index) => {
+                cardsHTML +=
+                    `
+                    ${(index % 4 == 0) ? '<div class="cardRow">' : ''}
+                        <div class="cardScene">   
+                            <div class="card" data-pair="${pairId}">
+                                    <div class="face front">front</div>
+                                    <div class="face back">${pairId}</div>
+                            </div>
+                        </div>
+                    ${(index % 4 == 3) ? '</div>' : ''}
+                    `
+            });
+
+            cardContainer.insertAdjacentHTML('beforeend', cardsHTML)
+
+            let initialiseCardFlipDelay = 0;
+            const intialiseCardSequenceDelay = 600;
+            for(let row of cardContainer.children)
+                for(let child of row.children) {
+                    console.log(initialiseCardFlipDelay);
+                    const childCard = child.querySelector('.card');
+                    
+                    
+                    setTimeout(() => {
+                        childCard.classList.toggle('cardActive');
+                        setTimeout(() =>  {
+                            childCard.classList.toggle('cardActive');
+                            if (!child.nextElementSibling){
+                                changePlayer(1);
+                                initialiseCardFlipDelay = 0;
+                                state = 0;
+                                currentCombo = 0;
+                                
+                                console.log("Game Initialisation is Complete");
+                            }
+                        }, intialiseCardSequenceDelay);
+                    }, initialiseCardFlipDelay * 0.7 * intialiseCardSequenceDelay)
+                    initialiseCardFlipDelay += 1;
+                }
+            console.log("OK");
+        }
+
+        const multiKillBannerGenerator = (combo) => {
+            const comboText =  {
+                2 : {text : "Double", classes : []},
+                3 : {text : "Triple", classes : ["rainbow"]},
+                4 : {text : "Ultra", classes : ["rainbow", "glow"]},
+                5 : {text : "Rampage", classes : ["rainbow", "glow", "afterEffects"]}
+            }
+
+            if (combo > 5)
+                combo = 5;
+            const multiKillBanner = document.querySelector('.multiKillsBanner');
+            const newBanner = document.createElement('p');
+            newBanner.innerHTML = comboText[combo].text
+            comboText[combo].classes.forEach(element => newBanner.classList.add(element));
+
+            multiKillBanner.append(newBanner);
+            setTimeout(() => newBanner.remove(), 5000);
+            return;
+
+        }
+
+        const gameHandler = event => {
+            if (event.target.matches('.card *, .card')){
+                const parentCard = event.target.closest('.card');
+
+                if (state > 90){ //Errorneous States ?    
+                    console.log("NOPE");
+                    return;
+                }
+
+                console.log(event.target);
+                console.log(state);
+                
+
+                if (state == 0){
+                    parentCard.classList.toggle('cardActive');
+                    openedCard = parentCard;
+                    state += 1;
+                }
+
+                else if (state == 1){
+                    parentCard.classList.toggle('cardActive');
+                    state += 1;
+                    if (parentCard.dataset.pair === openedCard.dataset.pair){
+                        console.log('yes you picked the pair correctly');
+                        setTimeout(() => matchPairsEffect(openedCard.closest('.cardScene'), parentCard.closest('.cardScene')), 1000);
+                        currentPlayer.querySelector('.playerScore').innerHTML = Number(currentPlayer.querySelector('.playerScore').innerHTML) + 1;
+                        openedPairs += 1;
+                        currentCombo += 1;
+
+                        if (currentCombo > 1)
+                            multiKillBannerGenerator(currentCombo);
+
+                        state %= 2;
+                        if (openedPairs == totalNumberPairs)
+                            console.log("Game has Ended");
+                    }
+                    else {
+                        console.log('nope you didnt pick the pair correctly');
+                        setTimeout(() => {
+                            openedCard.classList.toggle('cardActive');
+                            parentCard.classList.toggle('cardActive');
+                            changePlayer();
+                            currentCombo = 0;
+                            state %= 2;
+                            
+                        }, 650);
+
+                    }
+                }  
+            }
+        }
+
+        gameContainer.addEventListener('click', (event) => {
+            if (event.target.matches('#initialiseGame, #initialiseGame *')){
+                e = document.querySelector('select');
+                const gameMode = e.options[e.selectedIndex].value;
+                gameInitialiser(Number(gameMode));
+            }
+        })
+        cardContainer.addEventListener('click', gameHandler)
+    </script>
